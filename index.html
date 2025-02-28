@@ -3,12 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>表示例</title>
-    <!-- CSSファイルをリンク -->
-    <link rel="stylesheet" href="styles.css">
+    <title>hCaptcha 認証</title>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 </head>
 <body>
-    <h1>GitHub Pagesのサイト</h1>
-    <p>a</p>
+    <h1>hCaptcha 認証</h1>
+
+    <!-- hCaptchaウィジェット -->
+    <div class="h-captcha" data-sitekey="D696E0C4-B910-4FD0-855E-EEA02CAE14A6"></div>
+
+    <button onclick="verifyCaptcha()">認証確認</button>
+
+    <p id="result"></p>
+
+    <script>
+        function verifyCaptcha() {
+            const result = document.getElementById("result");
+            const response = hcaptcha.getResponse();
+
+            if (response.length === 0) {
+                result.innerHTML = "認証失敗: チェックを完了してください。";
+            } else {
+                result.innerHTML = "認証成功！";
+
+                // フロントエンドからバックエンドに送信
+                fetch('/verify-captcha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ response: response })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        result.innerHTML = "認証成功！";
+                    } else {
+                        result.innerHTML = "認証失敗！";
+                    }
+                });
+            }
+        }
+    </script>
 </body>
 </html>
